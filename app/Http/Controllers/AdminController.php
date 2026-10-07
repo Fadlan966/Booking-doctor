@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Doctor;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -23,13 +23,17 @@ class AdminController extends Controller
     // Fungsi untuk menambah master data dokter baru
     public function storeDoctor(Request $request)
     {
-        $request->validate([
+        // 1. Validasi data dan simpan hasilnya ke variabel $validatedData
+        $validatedData = $request->validate([
             'name' => 'required|string',
             'specialization' => 'required|string',
-            'consultation_fee' => 'required|numeric'
+            'consultation_fee' => 'required|numeric',
         ]);
 
-        Doctor::create($request->all());
+        // 2. Gunakan $validatedData untuk create, bukan $request->all()
+        // Ini otomatis akan mengabaikan _token dan hanya memasukkan data yang lolos validasi
+        Doctor::create($validatedData);
+
         return back()->with('success', 'Master data dokter berhasil ditambahkan!');
     }
 
@@ -38,9 +42,36 @@ class AdminController extends Controller
     {
         $appointment = Appointment::findOrFail($id);
         $appointment->update([
-            'status' => $request->status
+            'status' => $request->status,
         ]);
 
         return back()->with('success', 'Status appointment berhasil diperbarui!');
+    }
+
+    // Fungsi untuk Update data dokter (U)
+    public function updateDoctor(Request $request, $id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'specialization' => 'required|string',
+            'consultation_fee' => 'required|numeric'
+        ]);
+
+        $doctor->update($validatedData);
+
+        return back()->with('success', 'Master data dokter berhasil diperbarui!');
+    }
+
+    // Fungsi untuk Menghapus data dokter (D)
+    public function destroyDoctor($id)
+    {
+        $doctor = Doctor::findOrFail($id);
+
+        // Hapus data dari database
+        $doctor->delete();
+
+        return back()->with('success', 'Master data dokter berhasil dihapus!');
     }
 }
