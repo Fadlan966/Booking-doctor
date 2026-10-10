@@ -1,26 +1,20 @@
 <?php
 
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Admin Route
-Route::prefix('admin')->group(function () {
-    // Halaman Utama Admin (Dashboard)
-    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-
-
-    // Manajemen Master Komponen (Dokter)
-    Route::post('/doctors', [AdminController::class, 'storeDoctor'])->name('admin.doctors.store');
-
-    // Manajemen Alur Menu Appointment
-    Route::put('/appointments/{id}/status', [AdminController::class, 'updateAppointmentStatus'])->name('admin.appointments.updateStatus');
-
-    // Tambahkan route untuk update dan delete dokter
-    Route::put('/doctors/{id}', [AdminController::class, 'updateDoctor'])->name('admin.doctors.update');
-    Route::delete('/doctors/{id}', [AdminController::class, 'destroyDoctor'])->name('admin.doctors.destroy');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+require __DIR__.'/auth.php';
